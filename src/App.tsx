@@ -12,6 +12,7 @@ import ConsultationFlow from "./pages/ConsultationFlow";
 import PostConsultationSummary from "./pages/PostConsultationSummary";
 import MySubscriptions from "./pages/MySubscriptions";
 import CheckoutPage from "./pages/CheckoutPage";
+import ThankYou from "./pages/ThankYou";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -31,6 +32,7 @@ const App = () => (
           <Route path="/consultation-summary/:consultId" element={<PostConsultationSummary />} />
           <Route path="/subscriptions" element={<MySubscriptions />} />
           <Route path="/checkout" element={<CheckoutPage />} />
+          <Route path="/thank-you" element={<ThankYou />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>
