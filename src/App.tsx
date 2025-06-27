@@ -13,6 +13,8 @@ import PostConsultationSummary from "./pages/PostConsultationSummary";
 import MySubscriptions from "./pages/MySubscriptions";
 import CheckoutPage from "./pages/CheckoutPage";
 import ThankYou from "./pages/ThankYou";
+import OrderHistory from "./pages/OrderHistory";
+import PaymentMethods from "./pages/PaymentMethods";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -30,7 +32,9 @@ const App = () => (
           <Route path="/product/:id" element={<ProductDetailsPage />} />
           <Route path="/consultation/:productId" element={<ConsultationFlow />} />
           <Route path="/consultation-summary/:consultId" element={<PostConsultationSummary />} />
-          <Route path="/subscriptions" element={<MySubscriptions />} />
+          <Route path="/my-subscriptions" element={<MySubscriptions />} />
+          <Route path="/order-history" element={<OrderHistory />} />
+          <Route path="/payment-methods" element={<PaymentMethods />} />
           <Route path="/checkout" element={<CheckoutPage />} />
           <Route path="/thank-you" element={<ThankYou />} />
           <Route path="*" element={<NotFound />} />
