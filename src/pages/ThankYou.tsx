@@ -3,16 +3,54 @@ import { useEffect } from "react";
 import { useSearchParams, Link } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { CheckCircle, Package, CreditCard, User } from "lucide-react";
+import { CheckCircle, Package, Video, Clock, Truck, Mail } from "lucide-react";
 import Header from "@/components/Header";
+import { useToast } from "@/hooks/use-toast";
 
 const ThankYou = () => {
   const [searchParams] = useSearchParams();
+  const { toast } = useToast();
   const orderNumber = searchParams.get('order') || Math.random().toString(36).substr(2, 9).toUpperCase();
+  const totalAmount = searchParams.get('total') || '89.99';
 
   useEffect(() => {
     console.log("Thank you page loaded successfully");
   }, []);
+
+  const handleStartConsultation = async () => {
+    console.log("Starting consultation with Qualiphy API");
+    
+    // Simulate Qualiphy API call (placeholder)
+    try {
+      toast({
+        title: "Consultation Starting",
+        description: "Connecting you with a licensed provider...",
+      });
+      
+      // Placeholder for actual Qualiphy integration
+      // const response = await fetch('/api/qualiphy/start-consultation', {
+      //   method: 'POST',
+      //   headers: { 'Content-Type': 'application/json' },
+      //   body: JSON.stringify({ orderNumber })
+      // });
+      
+      // Simulate delay
+      setTimeout(() => {
+        toast({
+          title: "Provider Connected",
+          description: "Your consultation is ready to begin!",
+        });
+      }, 2000);
+      
+    } catch (error) {
+      console.error("Error starting consultation:", error);
+      toast({
+        title: "Connection Error",
+        description: "Please try again or contact support.",
+        variant: "destructive",
+      });
+    }
+  };
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -23,15 +61,15 @@ const ThankYou = () => {
           <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
             <CheckCircle className="h-8 w-8 text-green-600" />
           </div>
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">Thank You!</h1>
-          <p className="text-lg text-gray-600">Your order has been successfully placed</p>
+          <h1 className="text-3xl font-bold text-gray-900 mb-2">Order Confirmed!</h1>
+          <p className="text-lg text-gray-600">Your treatment plan is ready to begin</p>
         </div>
 
         <Card className="mb-8">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Package className="h-5 w-5" />
-              Order Confirmation
+              Order Details
             </CardTitle>
           </CardHeader>
           <CardContent>
@@ -41,66 +79,87 @@ const ThankYou = () => {
                 <span className="font-semibold">#{orderNumber}</span>
               </div>
               <div className="flex justify-between items-center">
-                <span className="text-gray-600">Expected Delivery:</span>
-                <span className="font-semibold">3-5 business days</span>
+                <span className="text-gray-600">Total Amount:</span>
+                <span className="font-semibold">${totalAmount}</span>
               </div>
               <div className="flex justify-between items-center">
                 <span className="text-gray-600">Status:</span>
-                <span className="text-green-600 font-semibold">Processing</span>
+                <span className="text-green-600 font-semibold">Awaiting Consultation</span>
               </div>
+            </div>
+            
+            <div className="mt-6 pt-6 border-t">
+              <Button 
+                onClick={handleStartConsultation}
+                className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3"
+                size="lg"
+              >
+                <Video className="h-5 w-5 mr-2" />
+                Start Your Consultation
+              </Button>
+              <p className="text-sm text-gray-500 text-center mt-2">
+                Connect with a licensed provider now
+              </p>
             </div>
           </CardContent>
         </Card>
 
         <Card className="mb-8">
           <CardHeader>
-            <CardTitle>What's Next?</CardTitle>
+            <CardTitle>What Happens Next</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="space-y-4">
-              <div className="flex items-start gap-3">
-                <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center flex-shrink-0">
-                  <span className="text-sm font-semibold text-blue-600">1</span>
+            <div className="space-y-6">
+              <div className="flex items-start gap-4">
+                <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center flex-shrink-0">
+                  <Video className="h-5 w-5 text-blue-600" />
                 </div>
                 <div>
-                  <h3 className="font-semibold">Order Processing</h3>
-                  <p className="text-sm text-gray-600">We're preparing your medication for shipment</p>
+                  <h3 className="font-semibold text-gray-900">Join your consultation call with a licensed provider</h3>
+                  <p className="text-sm text-gray-600 mt-1">Use the button above to connect immediately</p>
                 </div>
               </div>
-              <div className="flex items-start gap-3">
-                <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center flex-shrink-0">
-                  <span className="text-sm font-semibold text-blue-600">2</span>
+              
+              <div className="flex items-start gap-4">
+                <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center flex-shrink-0">
+                  <Clock className="h-5 w-5 text-blue-600" />
                 </div>
                 <div>
-                  <h3 className="font-semibold">Shipment</h3>
-                  <p className="text-sm text-gray-600">You'll receive tracking information via email</p>
+                  <h3 className="font-semibold text-gray-900">The doctor will confirm your eligibility and prescribe the best dosage</h3>
+                  <p className="text-sm text-gray-600 mt-1">Your consultation typically takes 10-15 minutes</p>
                 </div>
               </div>
-              <div className="flex items-start gap-3">
-                <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center flex-shrink-0">
-                  <span className="text-sm font-semibold text-blue-600">3</span>
+              
+              <div className="flex items-start gap-4">
+                <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center flex-shrink-0">
+                  <Truck className="h-5 w-5 text-blue-600" />
                 </div>
                 <div>
-                  <h3 className="font-semibold">Delivery</h3>
-                  <p className="text-sm text-gray-600">Your medication will arrive in discrete packaging</p>
+                  <h3 className="font-semibold text-gray-900">Your prescription will be processed and shipped within 1–3 business days</h3>
+                  <p className="text-sm text-gray-600 mt-1">Discreet packaging with tracking information provided</p>
+                </div>
+              </div>
+              
+              <div className="flex items-start gap-4">
+                <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center flex-shrink-0">
+                  <Mail className="h-5 w-5 text-blue-600" />
+                </div>
+                <div>
+                  <h3 className="font-semibold text-gray-900">You'll receive updates via email and can manage everything from "My Account"</h3>
+                  <p className="text-sm text-gray-600 mt-1">Track your order, schedule follow-ups, and manage subscriptions</p>
                 </div>
               </div>
             </div>
           </CardContent>
         </Card>
 
-        <div className="flex flex-col sm:flex-row gap-4 justify-center">
-          <Button asChild className="flex-1 sm:flex-none">
-            <Link to="/subscriptions" className="flex items-center gap-2">
-              <User className="h-4 w-4" />
-              My Account
-            </Link>
-          </Button>
-          <Button variant="outline" asChild className="flex-1 sm:flex-none">
-            <Link to="/" className="flex items-center gap-2">
-              Continue Shopping
-            </Link>
-          </Button>
+        <div className="text-center">
+          <p className="text-sm text-gray-500">
+            Need help? Contact our support team at{" "}
+            <a href="mailto:support@hyrehealth.com" className="text-blue-600 hover:underline">
+              support@hyrehealth.com
+            </a>
+          </p>
         </div>
       </div>
     </div>
