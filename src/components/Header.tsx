@@ -3,12 +3,10 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator } from "@/components/ui/dropdown-menu";
-import { Menu, X, User, ShoppingBag, CreditCard, Settings, LogOut, Package } from "lucide-react";
+import { Menu, X, User, ShoppingBag } from "lucide-react";
 
 const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const [isAuthenticated, setIsAuthenticated] = useState(false); // Mock auth state
   const navigate = useNavigate();
 
   return (
@@ -40,53 +38,27 @@ const Header = () => {
             <button className="text-gray-600 hover:text-gray-900 transition-colors">
               How It Works
             </button>
+            <button className="text-gray-600 hover:text-gray-900 transition-colors">
+              Support
+            </button>
           </nav>
 
           {/* Desktop Actions */}
           <div className="hidden md:flex items-center space-x-4">
-            {isAuthenticated ? (
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button variant="outline" size="sm">
-                    <User className="h-4 w-4 mr-2" />
-                    My Account
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="w-56">
-                  <DropdownMenuItem onClick={() => navigate('/subscriptions')}>
-                    <ShoppingBag className="h-4 w-4 mr-2" />
-                    Manage Subscriptions
-                    <Badge variant="secondary" className="ml-auto">2</Badge>
-                  </DropdownMenuItem>
-                  <DropdownMenuItem>
-                    <Package className="h-4 w-4 mr-2" />
-                    Order History
-                  </DropdownMenuItem>
-                  <DropdownMenuItem>
-                    <CreditCard className="h-4 w-4 mr-2" />
-                    Payment Methods
-                  </DropdownMenuItem>
-                  <DropdownMenuItem>
-                    <Settings className="h-4 w-4 mr-2" />
-                    Profile & Settings
-                  </DropdownMenuItem>
-                  <DropdownMenuSeparator />
-                  <DropdownMenuItem onClick={() => setIsAuthenticated(false)}>
-                    <LogOut className="h-4 w-4 mr-2" />
-                    Logout
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
-            ) : (
-              <Button 
-                variant="outline" 
-                size="sm"
-                onClick={() => navigate('/login')}
-              >
-                <User className="h-4 w-4 mr-2" />
-                Login
-              </Button>
-            )}
+            <Button 
+              variant="ghost" 
+              size="sm"
+              onClick={() => navigate('/subscriptions')}
+              className="relative"
+            >
+              <ShoppingBag className="h-4 w-4 mr-2" />
+              My Subscriptions
+              <Badge variant="secondary" className="ml-2">2</Badge>
+            </Button>
+            <Button variant="outline" size="sm">
+              <User className="h-4 w-4 mr-2" />
+              Account
+            </Button>
           </div>
 
           {/* Mobile Menu Button */}
@@ -117,49 +89,23 @@ const Header = () => {
               <button className="block w-full text-left text-gray-600 hover:text-gray-900 py-2">
                 How It Works
               </button>
+              <button className="block w-full text-left text-gray-600 hover:text-gray-900 py-2">
+                Support
+              </button>
               <div className="pt-4 space-y-2">
-                {isAuthenticated ? (
-                  <>
-                    <Button 
-                      variant="outline" 
-                      className="w-full justify-start"
-                      onClick={() => {navigate('/subscriptions'); setIsMenuOpen(false);}}
-                    >
-                      <ShoppingBag className="h-4 w-4 mr-2" />
-                      My Subscriptions
-                      <Badge variant="secondary" className="ml-auto">2</Badge>
-                    </Button>
-                    <Button variant="outline" className="w-full justify-start">
-                      <Package className="h-4 w-4 mr-2" />
-                      Order History
-                    </Button>
-                    <Button variant="outline" className="w-full justify-start">
-                      <CreditCard className="h-4 w-4 mr-2" />
-                      Payment Methods
-                    </Button>
-                    <Button variant="outline" className="w-full justify-start">
-                      <Settings className="h-4 w-4 mr-2" />
-                      Profile & Settings
-                    </Button>
-                    <Button 
-                      variant="ghost" 
-                      className="w-full justify-start"
-                      onClick={() => {setIsAuthenticated(false); setIsMenuOpen(false);}}
-                    >
-                      <LogOut className="h-4 w-4 mr-2" />
-                      Logout
-                    </Button>
-                  </>
-                ) : (
-                  <Button 
-                    variant="outline" 
-                    className="w-full justify-start"
-                    onClick={() => {navigate('/login'); setIsMenuOpen(false);}}
-                  >
-                    <User className="h-4 w-4 mr-2" />
-                    Login
-                  </Button>
-                )}
+                <Button 
+                  variant="outline" 
+                  className="w-full justify-start"
+                  onClick={() => {navigate('/subscriptions'); setIsMenuOpen(false);}}
+                >
+                  <ShoppingBag className="h-4 w-4 mr-2" />
+                  My Subscriptions
+                  <Badge variant="secondary" className="ml-auto">2</Badge>
+                </Button>
+                <Button variant="outline" className="w-full justify-start">
+                  <User className="h-4 w-4 mr-2" />
+                  Account
+                </Button>
               </div>
             </nav>
           </div>

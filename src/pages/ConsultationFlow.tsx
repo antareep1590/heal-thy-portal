@@ -1,6 +1,6 @@
 
 import { useState } from "react";
-import { useParams, useNavigate, useSearchParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -16,23 +16,19 @@ import Header from "@/components/Header";
 const ConsultationFlow = () => {
   const { productId } = useParams();
   const navigate = useNavigate();
-  const [searchParams] = useSearchParams();
   const [currentStep, setCurrentStep] = useState(1);
   const [formData, setFormData] = useState({});
 
-  const dosage = searchParams.get('dosage');
-  const duration = searchParams.get('duration');
-
-  const totalSteps = 2; // Removed checkout step from consultation
+  const totalSteps = 3;
   const progress = (currentStep / totalSteps) * 100;
 
   const handleNext = () => {
     if (currentStep < totalSteps) {
       setCurrentStep(currentStep + 1);
     } else {
-      // Complete consultation and redirect to checkout
+      // Complete consultation
       localStorage.setItem('lastConsultation', new Date().toISOString());
-      navigate(`/checkout?product=${productId}&dosage=${dosage}&duration=${duration}&consultCompleted=true`);
+      navigate(`/consultation-summary/12345`);
     }
   };
 
@@ -48,6 +44,8 @@ const ConsultationFlow = () => {
         return <GeneralQuestionnaire />;
       case 2:
         return <ProductIntakeForm />;
+      case 3:
+        return <CheckoutStep />;
       default:
         return <GeneralQuestionnaire />;
     }
@@ -234,6 +232,97 @@ const ConsultationFlow = () => {
     </div>
   );
 
+  const CheckoutStep = () => (
+    <div className="space-y-6">
+      <div>
+        <h2 className="text-2xl font-bold mb-2">Complete Your Order</h2>
+        <p className="text-gray-600">Review your treatment plan and complete payment.</p>
+      </div>
+
+      <Card>
+        <CardHeader>
+          <CardTitle>Treatment Summary</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-4">
+            <div className="flex justify-between">
+              <span>Product:</span>
+              <span className="font-semibold">Semaglutide</span>
+            </div>
+            <div className="flex justify-between">
+              <span>Recommended dosage:</span>
+              <span className="font-semibold">0.25mg (Starting dose)</span>
+            </div>
+            <div className="flex justify-between">
+              <span>Subscription:</span>
+              <span className="font-semibold">Monthly</span>
+            </div>
+            <hr />
+            <div className="flex justify-between">
+              <span>Consultation fee:</span>
+              <span>$49</span>
+            </div>
+            <div className="flex justify-between">
+              <span>First month treatment:</span>
+              <span>$299</span>
+            </div>
+            <div className="flex justify-between font-bold text-lg">
+              <span>Total today:</span>
+              <span>$348</span>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle>Payment Information</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div>
+            <Label htmlFor="card-number">Card Number</Label>
+            <Input id="card-number" placeholder="1234 5678 9012 3456" />
+          </div>
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <Label htmlFor="expiry">Expiry Date</Label>
+              <Input id="expiry" placeholder="MM/YY" />
+            </div>
+            <div>
+              <Label htmlFor="cvv">CVV</Label>
+              <Input id="cvv" placeholder="123" />
+            </div>
+          </div>
+          <div>
+            <Label htmlFor="billing-name">Name on Card</Label>
+            <Input id="billing-name" placeholder="John Doe" />
+          </div>
+        </CardContent>
+      </Card>
+
+      <div className="space-y-4">
+        <div className="flex items-center space-x-2">
+          <Checkbox id="hipaa" />
+          <Label htmlFor="hipaa" className="text-sm">
+            I acknowledge that I have read and agree to the HIPAA Privacy Notice
+          </Label>
+        </div>
+        <div className="flex items-center space-x-2">
+          <Checkbox id="terms" />
+          <Label htmlFor="terms" className="text-sm">
+            I agree to the Terms of Service and Treatment Consent
+          </Label>
+        </div>
+        <div className="flex items-center space-x-2">
+          <Checkbox id="prescription" />
+          <Label htmlFor="prescription" className="text-sm">
+            I understand this medication requires a valid prescription from a licensed physician
+          </Label>
+        </div>
+      </div>
+    </div>
+  );
+
   return (
     <div className="min-h-screen bg-gray-50">
       <Header />
@@ -246,10 +335,6 @@ const ConsultationFlow = () => {
             <span>{Math.round(progress)}% Complete</span>
           </div>
           <Progress value={progress} className="h-2" />
-          <div className="flex justify-between text-xs text-gray-400 mt-1">
-            <span>Health Assessment</span>
-            <span>Product Intake</span>
-          </div>
         </div>
 
         {/* Step Content */}
@@ -274,7 +359,7 @@ const ConsultationFlow = () => {
             {currentStep === totalSteps ? (
               <>
                 <CheckCircle className="h-4 w-4 mr-2" />
-                Complete & Proceed to Checkout
+                Complete Order
               </>
             ) : (
               <>

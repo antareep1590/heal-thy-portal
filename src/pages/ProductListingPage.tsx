@@ -116,7 +116,7 @@ const ProductListingPage = () => {
         case "rating":
           return b.rating - a.rating;
         case "popular":
-          return (b.popular ? 1 : 0) - (a.popular ? 1 : 0);
+          return b.popular - a.popular;
         default:
           return a.name.localeCompare(b.name);
       }
