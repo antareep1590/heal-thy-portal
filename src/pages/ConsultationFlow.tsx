@@ -1,6 +1,6 @@
 
 import { useState } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams, useNavigate, useSearchParams } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -16,8 +16,12 @@ import Header from "@/components/Header";
 const ConsultationFlow = () => {
   const { productId } = useParams();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const [currentStep, setCurrentStep] = useState(1);
   const [formData, setFormData] = useState({});
+
+  const dosage = searchParams.get('dosage');
+  const duration = searchParams.get('duration');
 
   const totalSteps = 3;
   const progress = (currentStep / totalSteps) * 100;
@@ -26,9 +30,9 @@ const ConsultationFlow = () => {
     if (currentStep < totalSteps) {
       setCurrentStep(currentStep + 1);
     } else {
-      // Complete consultation
+      // Complete consultation and proceed to checkout
       localStorage.setItem('lastConsultation', new Date().toISOString());
-      navigate(`/consultation-summary/12345`);
+      navigate(`/checkout?product=${productId}&dosage=${dosage}&duration=${duration}`);
     }
   };
 
@@ -45,7 +49,7 @@ const ConsultationFlow = () => {
       case 2:
         return <ProductIntakeForm />;
       case 3:
-        return <CheckoutStep />;
+        return <ConsultationSummary />;
       default:
         return <GeneralQuestionnaire />;
     }
@@ -232,11 +236,11 @@ const ConsultationFlow = () => {
     </div>
   );
 
-  const CheckoutStep = () => (
+  const ConsultationSummary = () => (
     <div className="space-y-6">
       <div>
-        <h2 className="text-2xl font-bold mb-2">Complete Your Order</h2>
-        <p className="text-gray-600">Review your treatment plan and complete payment.</p>
+        <h2 className="text-2xl font-bold mb-2">Review Your Information</h2>
+        <p className="text-gray-600">Please review your consultation details before proceeding to checkout.</p>
       </div>
 
       <Card>
@@ -250,74 +254,30 @@ const ConsultationFlow = () => {
               <span className="font-semibold">Semaglutide</span>
             </div>
             <div className="flex justify-between">
-              <span>Recommended dosage:</span>
-              <span className="font-semibold">0.25mg (Starting dose)</span>
+              <span>Selected dosage:</span>
+              <span className="font-semibold">{dosage || "0.25mg"}</span>
             </div>
             <div className="flex justify-between">
-              <span>Subscription:</span>
-              <span className="font-semibold">Monthly</span>
-            </div>
-            <hr />
-            <div className="flex justify-between">
-              <span>Consultation fee:</span>
-              <span>$49</span>
+              <span>Subscription duration:</span>
+              <span className="font-semibold">{duration || "1"} month{duration !== "1" ? 's' : ''}</span>
             </div>
             <div className="flex justify-between">
-              <span>First month treatment:</span>
-              <span>$299</span>
-            </div>
-            <div className="flex justify-between font-bold text-lg">
-              <span>Total today:</span>
-              <span>$348</span>
+              <span>Consultation status:</span>
+              <span className="font-semibold text-green-600">Completed</span>
             </div>
           </div>
         </CardContent>
       </Card>
 
-      <Card>
-        <CardHeader>
-          <CardTitle>Payment Information</CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-4">
+      <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+        <div className="flex items-start">
+          <CheckCircle className="h-5 w-5 text-blue-600 mt-0.5 mr-3" />
           <div>
-            <Label htmlFor="card-number">Card Number</Label>
-            <Input id="card-number" placeholder="1234 5678 9012 3456" />
+            <h4 className="font-semibold text-blue-900">Consultation Complete</h4>
+            <p className="text-blue-700 text-sm mt-1">
+              Your consultation is now valid for 3 months of treatment access. You can proceed to checkout to complete your purchase.
+            </p>
           </div>
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <Label htmlFor="expiry">Expiry Date</Label>
-              <Input id="expiry" placeholder="MM/YY" />
-            </div>
-            <div>
-              <Label htmlFor="cvv">CVV</Label>
-              <Input id="cvv" placeholder="123" />
-            </div>
-          </div>
-          <div>
-            <Label htmlFor="billing-name">Name on Card</Label>
-            <Input id="billing-name" placeholder="John Doe" />
-          </div>
-        </CardContent>
-      </Card>
-
-      <div className="space-y-4">
-        <div className="flex items-center space-x-2">
-          <Checkbox id="hipaa" />
-          <Label htmlFor="hipaa" className="text-sm">
-            I acknowledge that I have read and agree to the HIPAA Privacy Notice
-          </Label>
-        </div>
-        <div className="flex items-center space-x-2">
-          <Checkbox id="terms" />
-          <Label htmlFor="terms" className="text-sm">
-            I agree to the Terms of Service and Treatment Consent
-          </Label>
-        </div>
-        <div className="flex items-center space-x-2">
-          <Checkbox id="prescription" />
-          <Label htmlFor="prescription" className="text-sm">
-            I understand this medication requires a valid prescription from a licensed physician
-          </Label>
         </div>
       </div>
     </div>
@@ -358,8 +318,8 @@ const ConsultationFlow = () => {
           <Button onClick={handleNext}>
             {currentStep === totalSteps ? (
               <>
-                <CheckCircle className="h-4 w-4 mr-2" />
-                Complete Order
+                Proceed to Checkout
+                <ArrowRight className="h-4 w-4 ml-2" />
               </>
             ) : (
               <>

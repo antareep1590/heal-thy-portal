@@ -76,13 +76,18 @@ const ProductDetailsPage = () => {
   const selectedDosagePrice = product.dosages.find(d => d.value === selectedDosage)?.price || product.basePrice;
   const totalPrice = selectedDosagePrice * parseInt(subscriptionDuration);
 
-  const handlePurchase = () => {
-    if (hasValidConsultation && selectedDosage) {
-      // Proceed to checkout
+  const handleProceedToCheckout = () => {
+    if (!selectedDosage) {
+      alert("Please select a dosage first");
+      return;
+    }
+
+    if (hasValidConsultation) {
+      // User has valid consultation, go directly to checkout
       navigate(`/checkout?product=${id}&dosage=${selectedDosage}&duration=${subscriptionDuration}`);
     } else {
-      // Start consultation
-      navigate(`/consultation/${id}`);
+      // User needs consultation first
+      navigate(`/consultation/${id}?dosage=${selectedDosage}&duration=${subscriptionDuration}`);
     }
   };
 
@@ -240,10 +245,10 @@ const ProductDetailsPage = () => {
                 {/* CTA Button */}
                 <Button 
                   className="w-full text-lg py-6"
-                  onClick={handlePurchase}
+                  onClick={handleProceedToCheckout}
                   disabled={!selectedDosage}
                 >
-                  {hasValidConsultation ? 'Add to Cart' : 'Start Consultation'}
+                  Proceed to Checkout
                 </Button>
 
                 {/* Trust Indicators */}
