@@ -7,6 +7,7 @@ import { Menu, X, User, ShoppingBag } from "lucide-react";
 
 const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [isAuthenticated, setIsAuthenticated] = useState(false); // Mock auth state
   const navigate = useNavigate();
 
   return (
@@ -38,27 +39,44 @@ const Header = () => {
             <button className="text-gray-600 hover:text-gray-900 transition-colors">
               How It Works
             </button>
-            <button className="text-gray-600 hover:text-gray-900 transition-colors">
-              Support
-            </button>
           </nav>
 
           {/* Desktop Actions */}
           <div className="hidden md:flex items-center space-x-4">
-            <Button 
-              variant="ghost" 
-              size="sm"
-              onClick={() => navigate('/subscriptions')}
-              className="relative"
-            >
-              <ShoppingBag className="h-4 w-4 mr-2" />
-              My Subscriptions
-              <Badge variant="secondary" className="ml-2">2</Badge>
-            </Button>
-            <Button variant="outline" size="sm">
-              <User className="h-4 w-4 mr-2" />
-              Account
-            </Button>
+            {isAuthenticated ? (
+              <>
+                <Button 
+                  variant="ghost" 
+                  size="sm"
+                  onClick={() => navigate('/subscriptions')}
+                  className="relative"
+                >
+                  <ShoppingBag className="h-4 w-4 mr-2" />
+                  My Subscriptions
+                  <Badge variant="secondary" className="ml-2">2</Badge>
+                </Button>
+                <Button variant="outline" size="sm">
+                  <User className="h-4 w-4 mr-2" />
+                  Account
+                </Button>
+                <Button 
+                  variant="ghost" 
+                  size="sm"
+                  onClick={() => setIsAuthenticated(false)}
+                >
+                  Logout
+                </Button>
+              </>
+            ) : (
+              <Button 
+                variant="outline" 
+                size="sm"
+                onClick={() => navigate('/login')}
+              >
+                <User className="h-4 w-4 mr-2" />
+                Login
+              </Button>
+            )}
           </div>
 
           {/* Mobile Menu Button */}
@@ -89,23 +107,40 @@ const Header = () => {
               <button className="block w-full text-left text-gray-600 hover:text-gray-900 py-2">
                 How It Works
               </button>
-              <button className="block w-full text-left text-gray-600 hover:text-gray-900 py-2">
-                Support
-              </button>
               <div className="pt-4 space-y-2">
-                <Button 
-                  variant="outline" 
-                  className="w-full justify-start"
-                  onClick={() => {navigate('/subscriptions'); setIsMenuOpen(false);}}
-                >
-                  <ShoppingBag className="h-4 w-4 mr-2" />
-                  My Subscriptions
-                  <Badge variant="secondary" className="ml-auto">2</Badge>
-                </Button>
-                <Button variant="outline" className="w-full justify-start">
-                  <User className="h-4 w-4 mr-2" />
-                  Account
-                </Button>
+                {isAuthenticated ? (
+                  <>
+                    <Button 
+                      variant="outline" 
+                      className="w-full justify-start"
+                      onClick={() => {navigate('/subscriptions'); setIsMenuOpen(false);}}
+                    >
+                      <ShoppingBag className="h-4 w-4 mr-2" />
+                      My Subscriptions
+                      <Badge variant="secondary" className="ml-auto">2</Badge>
+                    </Button>
+                    <Button variant="outline" className="w-full justify-start">
+                      <User className="h-4 w-4 mr-2" />
+                      Account
+                    </Button>
+                    <Button 
+                      variant="ghost" 
+                      className="w-full justify-start"
+                      onClick={() => {setIsAuthenticated(false); setIsMenuOpen(false);}}
+                    >
+                      Logout
+                    </Button>
+                  </>
+                ) : (
+                  <Button 
+                    variant="outline" 
+                    className="w-full justify-start"
+                    onClick={() => {navigate('/login'); setIsMenuOpen(false);}}
+                  >
+                    <User className="h-4 w-4 mr-2" />
+                    Login
+                  </Button>
+                )}
               </div>
             </nav>
           </div>
