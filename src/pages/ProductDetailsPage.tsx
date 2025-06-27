@@ -82,13 +82,9 @@ const ProductDetailsPage = () => {
       return;
     }
 
-    if (hasValidConsultation) {
-      // User has valid consultation, go directly to checkout
-      navigate(`/checkout?product=${id}&dosage=${selectedDosage}&duration=${subscriptionDuration}`);
-    } else {
-      // User needs consultation first
-      navigate(`/consultation/${id}?dosage=${selectedDosage}&duration=${subscriptionDuration}`);
-    }
+    // Always route to consultation flow first
+    // The consultation flow will determine if steps can be skipped
+    navigate(`/consultation/${id}?dosage=${selectedDosage}&duration=${subscriptionDuration}`);
   };
 
   return (
@@ -175,8 +171,8 @@ const ProductDetailsPage = () => {
                   <Alert className="mb-6 border-blue-200 bg-blue-50">
                     <Clock className="h-4 w-4 text-blue-600" />
                     <AlertDescription className="text-blue-800">
-                      <strong>Consultation required before first purchase</strong><br />
-                      Valid for 3 months of treatment access
+                      <strong>Consultation required before purchase</strong><br />
+                      Complete our questionnaire and medical intake form to proceed
                     </AlertDescription>
                   </Alert>
                 )}

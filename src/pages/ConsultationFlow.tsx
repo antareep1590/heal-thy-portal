@@ -19,18 +19,24 @@ const ConsultationFlow = () => {
   const [searchParams] = useSearchParams();
   const [currentStep, setCurrentStep] = useState(1);
   const [formData, setFormData] = useState({});
+  const [isEligible, setIsEligible] = useState(true);
 
   const dosage = searchParams.get('dosage');
   const duration = searchParams.get('duration');
 
-  const totalSteps = 3;
+  const totalSteps = 2; // Only General Questionnaire and Product Intake Form
   const progress = (currentStep / totalSteps) * 100;
 
   const handleNext = () => {
-    if (currentStep < totalSteps) {
-      setCurrentStep(currentStep + 1);
-    } else {
-      // Complete consultation and proceed to checkout
+    if (currentStep === 1) {
+      // After general questionnaire, check eligibility
+      if (!isEligible) {
+        alert("Based on your responses, this treatment may not be suitable for you. Please consult with a healthcare provider.");
+        return;
+      }
+      setCurrentStep(2);
+    } else if (currentStep === 2) {
+      // After product intake form, proceed to checkout
       localStorage.setItem('lastConsultation', new Date().toISOString());
       navigate(`/checkout?product=${productId}&dosage=${dosage}&duration=${duration}`);
     }
@@ -45,17 +51,15 @@ const ConsultationFlow = () => {
   const renderStep = () => {
     switch (currentStep) {
       case 1:
-        return <GeneralQuestionnaire />;
+        return <GeneralQuestionnaire setIsEligible={setIsEligible} />;
       case 2:
         return <ProductIntakeForm />;
-      case 3:
-        return <ConsultationSummary />;
       default:
-        return <GeneralQuestionnaire />;
+        return <GeneralQuestionnaire setIsEligible={setIsEligible} />;
     }
   };
 
-  const GeneralQuestionnaire = () => (
+  const GeneralQuestionnaire = ({ setIsEligible }: { setIsEligible: (eligible: boolean) => void }) => (
     <div className="space-y-6">
       <div>
         <h2 className="text-2xl font-bold mb-2">General Health Assessment</h2>
@@ -65,7 +69,21 @@ const ConsultationFlow = () => {
       <div className="space-y-4">
         <div>
           <Label htmlFor="age">Age</Label>
-          <Input id="age" type="number" placeholder="Enter your age" min="18" max="100" />
+          <Input 
+            id="age" 
+            type="number" 
+            placeholder="Enter your age" 
+            min="18" 
+            max="100"
+            onChange={(e) => {
+              const age = parseInt(e.target.value);
+              if (age < 18 || age > 80) {
+                setIsEligible(false);
+              } else {
+                setIsEligible(true);
+              }
+            }}
+          />
         </div>
 
         <div>
@@ -108,7 +126,14 @@ const ConsultationFlow = () => {
               "Mental health conditions"
             ].map((condition) => (
               <div key={condition} className="flex items-center space-x-2">
-                <Checkbox id={condition} />
+                <Checkbox 
+                  id={condition}
+                  onCheckedChange={(checked) => {
+                    if (checked && (condition.includes("Heart disease") || condition.includes("Kidney disease"))) {
+                      setIsEligible(false);
+                    }
+                  }}
+                />
                 <Label htmlFor={condition} className="text-sm">{condition}</Label>
               </div>
             ))}
@@ -232,52 +257,15 @@ const ConsultationFlow = () => {
             ))}
           </div>
         </div>
-      </div>
-    </div>
-  );
 
-  const ConsultationSummary = () => (
-    <div className="space-y-6">
-      <div>
-        <h2 className="text-2xl font-bold mb-2">Review Your Information</h2>
-        <p className="text-gray-600">Please review your consultation details before proceeding to checkout.</p>
-      </div>
-
-      <Card>
-        <CardHeader>
-          <CardTitle>Treatment Summary</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="space-y-4">
-            <div className="flex justify-between">
-              <span>Product:</span>
-              <span className="font-semibold">Semaglutide</span>
-            </div>
-            <div className="flex justify-between">
-              <span>Selected dosage:</span>
-              <span className="font-semibold">{dosage || "0.25mg"}</span>
-            </div>
-            <div className="flex justify-between">
-              <span>Subscription duration:</span>
-              <span className="font-semibold">{duration || "1"} month{duration !== "1" ? 's' : ''}</span>
-            </div>
-            <div className="flex justify-between">
-              <span>Consultation status:</span>
-              <span className="font-semibold text-green-600">Completed</span>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
-
-      <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-        <div className="flex items-start">
-          <CheckCircle className="h-5 w-5 text-blue-600 mt-0.5 mr-3" />
-          <div>
-            <h4 className="font-semibold text-blue-900">Consultation Complete</h4>
-            <p className="text-blue-700 text-sm mt-1">
-              Your consultation is now valid for 3 months of treatment access. You can proceed to checkout to complete your purchase.
-            </p>
-          </div>
+        <div>
+          <Label htmlFor="allergies">Known allergies or adverse reactions</Label>
+          <Textarea 
+            id="allergies" 
+            placeholder="List any known allergies to medications, foods, or other substances..."
+            className="mt-1"
+            rows={2}
+          />
         </div>
       </div>
     </div>
@@ -295,6 +283,10 @@ const ConsultationFlow = () => {
             <span>{Math.round(progress)}% Complete</span>
           </div>
           <Progress value={progress} className="h-2" />
+          <div className="flex justify-between text-xs text-gray-400 mt-1">
+            <span>General Questionnaire</span>
+            <span>Product Intake Form</span>
+          </div>
         </div>
 
         {/* Step Content */}
@@ -315,7 +307,10 @@ const ConsultationFlow = () => {
             Previous
           </Button>
           
-          <Button onClick={handleNext}>
+          <Button 
+            onClick={handleNext}
+            disabled={!isEligible}
+          >
             {currentStep === totalSteps ? (
               <>
                 Proceed to Checkout
