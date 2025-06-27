@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { Card, CardContent } from "@/components/ui/card";
@@ -17,6 +16,18 @@ const ProductDetailsPage = () => {
   const [selectedDosage, setSelectedDosage] = useState("");
   const [subscriptionDuration, setSubscriptionDuration] = useState("1");
   
+  // Check if user has valid consultation (within 3 months)
+  const hasValidConsultation = () => {
+    const lastConsult = localStorage.getItem('lastConsultation');
+    if (!lastConsult) return false;
+    
+    const consultDate = new Date(lastConsult);
+    const threeMonthsAgo = new Date();
+    threeMonthsAgo.setMonth(threeMonthsAgo.getMonth() - 3);
+    
+    return consultDate > threeMonthsAgo;
+  };
+
   // Mock product data
   const product = {
     id: 1,
@@ -59,7 +70,11 @@ const ProductDetailsPage = () => {
 
   const handleProceedToCheckout = () => {
     if (selectedDosage) {
-      navigate(`/checkout?product=${id}&dosage=${selectedDosage}&duration=${subscriptionDuration}`);
+      if (hasValidConsultation()) {
+        navigate(`/checkout?product=${id}&dosage=${selectedDosage}&duration=${subscriptionDuration}`);
+      } else {
+        navigate(`/consultation/${id}?dosage=${selectedDosage}&duration=${subscriptionDuration}`);
+      }
     }
   };
 
@@ -179,7 +194,10 @@ const ProductDetailsPage = () => {
                 <Alert className="mb-6 border-blue-200 bg-blue-50">
                   <Clock className="h-4 w-4 text-blue-600" />
                   <AlertDescription className="text-blue-800">
-                    Checkout includes required consultation. You'll only need to consult once every 3 months.
+                    {hasValidConsultation() 
+                      ? "Your consultation is still valid. You can proceed directly to checkout."
+                      : "Consultation required before purchase. You'll complete this during checkout - only needed once every 3 months."
+                    }
                   </AlertDescription>
                 </Alert>
 
@@ -231,14 +249,16 @@ const ProductDetailsPage = () => {
                     <span>Duration:</span>
                     <span>{subscriptionDuration} month{subscriptionDuration !== "1" ? 's' : ''}</span>
                   </div>
-                  <div className="flex justify-between text-sm text-gray-600">
-                    <span>Consultation fee:</span>
-                    <span>$49</span>
-                  </div>
+                  {!hasValidConsultation() && (
+                    <div className="flex justify-between text-sm text-gray-600">
+                      <span>Consultation fee:</span>
+                      <span>$49</span>
+                    </div>
+                  )}
                   <Separator />
                   <div className="flex justify-between text-lg font-semibold">
                     <span>Total:</span>
-                    <span>${totalPrice + 49}</span>
+                    <span>${totalPrice + (hasValidConsultation() ? 0 : 49)}</span>
                   </div>
                 </div>
 
@@ -247,8 +267,9 @@ const ProductDetailsPage = () => {
                   className="w-full text-lg py-6"
                   onClick={handleProceedToCheckout}
                   disabled={!selectedDosage}
+                  title={!hasValidConsultation() ? "Your consultation will be completed before final payment" : ""}
                 >
-                  Proceed to Checkout
+                  {hasValidConsultation() ? "Proceed to Checkout" : "Start Consultation & Checkout"}
                   <ArrowRight className="h-4 w-4 ml-2" />
                 </Button>
 

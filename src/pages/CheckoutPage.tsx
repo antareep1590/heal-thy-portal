@@ -28,16 +28,24 @@ const CheckoutPage = () => {
   const [state, setState] = useState("");
   const [zipCode, setZipCode] = useState("");
   const [country, setCountry] = useState("US");
+  const [cardNumber, setCardNumber] = useState("");
+  const [expiryDate, setExpiryDate] = useState("");
+  const [cvv, setCvv] = useState("");
+  const [cardholderName, setCardholderName] = useState("");
   const [acceptTerms, setAcceptTerms] = useState(false);
 
   const productId = searchParams.get('product') || '1';
   const dosage = searchParams.get('dosage') || '0.25mg';
   const duration = searchParams.get('duration') || '1';
+  const consultCompleted = searchParams.get('consultCompleted') === 'true';
 
   // Mock product data
   const product = { name: "Semaglutide", price: 299 };
-  const consultationFee = 49;
+  const consultationFee = consultCompleted ? 0 : 49;
   const totalPrice = product.price * parseInt(duration) + consultationFee;
+
+  // Mock authentication state - in real app this would come from auth context
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -48,9 +56,11 @@ const CheckoutPage = () => {
     
     setIsLoading(true);
     
-    // Mock checkout process
+    // Mock checkout process - simulate account creation and login
     setTimeout(() => {
       setIsLoading(false);
+      // Simulate account creation and auto-login
+      setIsAuthenticated(true);
       navigate('/thank-you');
     }, 2000);
   };
@@ -201,44 +211,88 @@ const CheckoutPage = () => {
                       Payment Information
                     </CardTitle>
                   </CardHeader>
-                  <CardContent>
+                  <CardContent className="space-y-4">
                     <div className="bg-blue-50 p-4 rounded-lg mb-4">
                       <p className="text-sm text-blue-800">
                         <Shield className="h-4 w-4 inline mr-1" />
                         Secure payment powered by Stripe. Your card information is encrypted and secure.
                       </p>
                     </div>
-                    <div className="bg-gray-100 p-4 rounded-lg text-center">
-                      <p className="text-gray-600">Stripe payment form would be embedded here</p>
+                    
+                    <div>
+                      <Label htmlFor="cardholderName">Cardholder Name *</Label>
+                      <Input
+                        id="cardholderName"
+                        value={cardholderName}
+                        onChange={(e) => setCardholderName(e.target.value)}
+                        placeholder="Name as it appears on card"
+                        required
+                      />
+                    </div>
+                    
+                    <div>
+                      <Label htmlFor="cardNumber">Card Number *</Label>
+                      <Input
+                        id="cardNumber"
+                        value={cardNumber}
+                        onChange={(e) => setCardNumber(e.target.value)}
+                        placeholder="1234 5678 9012 3456"
+                        required
+                      />
+                    </div>
+                    
+                    <div className="grid grid-cols-2 gap-4">
+                      <div>
+                        <Label htmlFor="expiryDate">Expiry Date *</Label>
+                        <Input
+                          id="expiryDate"
+                          value={expiryDate}
+                          onChange={(e) => setExpiryDate(e.target.value)}
+                          placeholder="MM/YY"
+                          required
+                        />
+                      </div>
+                      <div>
+                        <Label htmlFor="cvv">CVV *</Label>
+                        <Input
+                          id="cvv"
+                          value={cvv}
+                          onChange={(e) => setCvv(e.target.value)}
+                          placeholder="123"
+                          required
+                        />
+                      </div>
                     </div>
                   </CardContent>
                 </Card>
 
                 {/* Account Creation */}
-                <Card>
-                  <CardHeader>
-                    <CardTitle>Create Your Account</CardTitle>
-                    <p className="text-sm text-gray-600">
-                      An account will be created to manage your orders and subscriptions
-                    </p>
-                  </CardHeader>
-                  <CardContent>
-                    <div>
-                      <Label htmlFor="password">Set Password *</Label>
-                      <Input
-                        id="password"
-                        type="password"
-                        value={password}
-                        onChange={(e) => setPassword(e.target.value)}
-                        placeholder="Create a secure password"
-                        required
-                      />
-                      <p className="text-xs text-gray-500 mt-1">
-                        Password must be at least 8 characters long
+                {!isAuthenticated && (
+                  <Card>
+                    <CardHeader>
+                      <CardTitle>Create Your Account</CardTitle>
+                      <p className="text-sm text-gray-600">
+                        An account will be created to manage your orders and subscriptions
                       </p>
-                    </div>
-                  </CardContent>
-                </Card>
+                    </CardHeader>
+                    <CardContent>
+                      <div>
+                        <Label htmlFor="password">Set Password *</Label>
+                        <Input
+                          id="password"
+                          type="password"
+                          value={password}
+                          onChange={(e) => setPassword(e.target.value)}
+                          placeholder="Create a secure password"
+                          required
+                        />
+                        <p className="text-xs text-gray-500 mt-1">
+                          Password must be at least 8 characters long
+                        </p>
+                      </div>
+                    </CardContent>
+                  </Card>
+                )}
 
                 {/* Terms and Conditions */}
                 <Card>
@@ -286,10 +340,12 @@ const CheckoutPage = () => {
                     <span>Duration:</span>
                     <span>{duration} month{duration !== "1" ? 's' : ''}</span>
                   </div>
-                  <div className="flex justify-between">
-                    <span>Consultation fee:</span>
-                    <span>${consultationFee}</span>
-                  </div>
+                  {consultationFee > 0 && (
+                    <div className="flex justify-between">
+                      <span>Consultation fee:</span>
+                      <span>${consultationFee}</span>
+                    </div>
+                  )}
                   <Separator />
                   <div className="flex justify-between font-semibold text-lg">
                     <span>Total:</span>
@@ -299,7 +355,10 @@ const CheckoutPage = () => {
                   <div className="mt-6 p-4 bg-blue-50 rounded-lg">
                     <p className="text-sm text-blue-800">
                       <Shield className="h-4 w-4 inline mr-1" />
-                      Includes required consultation valid for 3 months
+                      {consultCompleted 
+                        ? "Consultation completed - valid for 3 months" 
+                        : "Includes required consultation valid for 3 months"
+                      }
                     </p>
                   </div>
                 </CardContent>
