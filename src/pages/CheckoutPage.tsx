@@ -8,7 +8,7 @@ import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Separator } from "@/components/ui/separator";
-import { Shield, CreditCard } from "lucide-react";
+import { Shield, CreditCard, X } from "lucide-react";
 import Header from "@/components/Header";
 
 const CheckoutPage = () => {
@@ -18,6 +18,7 @@ const CheckoutPage = () => {
   const productId = searchParams.get('product');
   const dosage = searchParams.get('dosage');
   const duration = searchParams.get('duration') || '1';
+  const relatedProductIds = searchParams.get('relatedProducts')?.split(',').filter(Boolean) || [];
 
   const [formData, setFormData] = useState({
     firstName: '',
@@ -38,6 +39,7 @@ const CheckoutPage = () => {
     acceptTerms: false
   });
 
+  const [selectedRelatedProducts, setSelectedRelatedProducts] = useState<string[]>(relatedProductIds);
   const [isLoggedIn] = useState(false); // Mock login state
 
   // Mock product data
@@ -50,12 +52,26 @@ const CheckoutPage = () => {
     ]
   };
 
+  // Mock related products data
+  const relatedProductsData = [
+    { id: "2", name: "B12 Injection", price: 99 },
+    { id: "3", name: "Tirzepatide", price: 399 }
+  ];
+
   const selectedDosagePrice = product.dosages.find(d => d.value === dosage)?.price || 299;
-  const totalPrice = selectedDosagePrice * parseInt(duration);
+  const relatedProductsTotal = selectedRelatedProducts.reduce((total, productId) => {
+    const relatedProduct = relatedProductsData.find(p => p.id === productId);
+    return total + (relatedProduct?.price || 0);
+  }, 0);
+  const totalPrice = (selectedDosagePrice + relatedProductsTotal) * parseInt(duration);
   const consultationFee = 49;
 
   const handleInputChange = (field: string, value: string | boolean) => {
     setFormData(prev => ({ ...prev, [field]: value }));
+  };
+
+  const handleRemoveRelatedProduct = (productId: string) => {
+    setSelectedRelatedProducts(prev => prev.filter(id => id !== productId));
   };
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -79,7 +95,10 @@ const CheckoutPage = () => {
     localStorage.setItem('userEmail', formData.email);
     
     // Navigate to thank you page
-    navigate('/thank-you');
+    const relatedProductsParam = selectedRelatedProducts.length > 0 
+      ? `&relatedProducts=${selectedRelatedProducts.join(',')}` 
+      : '';
+    navigate(`/thank-you?total=${totalPrice + consultationFee}${relatedProductsParam}`);
   };
 
   return (
@@ -317,19 +336,55 @@ const CheckoutPage = () => {
                 <CardTitle>Order Summary</CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
+                {/* Main Product */}
+                <div className="p-4 bg-blue-50 rounded-lg">
+                  <div className="flex justify-between items-start mb-2">
+                    <div>
+                      <h3 className="font-semibold text-gray-900">{product.name}</h3>
+                      <p className="text-sm text-gray-600">Dosage: {dosage}</p>
+                      <p className="text-sm text-gray-600">Duration: {duration} month{duration !== "1" ? 's' : ''}</p>
+                    </div>
+                    <p className="font-semibold">${selectedDosagePrice * parseInt(duration)}</p>
+                  </div>
+                </div>
+
+                {/* Related Products */}
+                {selectedRelatedProducts.length > 0 && (
+                  <div className="space-y-2">
+                    <h4 className="font-semibold text-sm text-gray-700">Additional Products:</h4>
+                    {selectedRelatedProducts.map(productId => {
+                      const relatedProduct = relatedProductsData.find(p => p.id === productId);
+                      if (!relatedProduct) return null;
+                      
+                      return (
+                        <div key={productId} className="p-3 bg-gray-50 rounded-lg">
+                          <div className="flex justify-between items-center">
+                            <div>
+                              <h5 className="font-medium text-gray-900">{relatedProduct.name}</h5>
+                              <p className="text-sm text-gray-600">{duration} month{duration !== "1" ? 's' : ''}</p>
+                            </div>
+                            <div className="flex items-center space-x-2">
+                              <span className="font-semibold">${relatedProduct.price * parseInt(duration)}</span>
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => handleRemoveRelatedProduct(productId)}
+                                className="text-red-600 hover:text-red-800"
+                              >
+                                <X className="h-4 w-4" />
+                              </Button>
+                            </div>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
+
+                <Separator />
+
+                {/* Pricing Summary */}
                 <div className="space-y-3">
-                  <div className="flex justify-between">
-                    <span>Product:</span>
-                    <span className="font-semibold">{product.name}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span>Dosage:</span>
-                    <span>{dosage}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span>Duration:</span>
-                    <span>{duration} month{duration !== "1" ? 's' : ''}</span>
-                  </div>
                   <div className="flex justify-between">
                     <span>Treatment cost:</span>
                     <span>${totalPrice}</span>

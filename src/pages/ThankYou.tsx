@@ -12,6 +12,15 @@ const ThankYou = () => {
   const { toast } = useToast();
   const orderNumber = searchParams.get('order') || Math.random().toString(36).substr(2, 9).toUpperCase();
   const totalAmount = searchParams.get('total') || '89.99';
+  const relatedProductIds = searchParams.get('relatedProducts')?.split(',').filter(Boolean) || [];
+
+  // Mock related products data
+  const relatedProductsData = [
+    { id: "2", name: "B12 Injection", deliveryTime: "2-3 business days" },
+    { id: "3", name: "Tirzepatide", deliveryTime: "1-3 business days" }
+  ];
+
+  const selectedRelatedProducts = relatedProductsData.filter(p => relatedProductIds.includes(p.id));
 
   useEffect(() => {
     console.log("Thank you page loaded successfully");
@@ -85,6 +94,30 @@ const ThankYou = () => {
               <div className="flex justify-between items-center">
                 <span className="text-gray-600">Status:</span>
                 <span className="text-green-600 font-semibold">Awaiting Consultation</span>
+              </div>
+            </div>
+
+            {/* Products with Delivery Timeline */}
+            <div className="mt-6 pt-6 border-t">
+              <h3 className="font-semibold mb-4">Your Products & Delivery Timeline:</h3>
+              <div className="space-y-3">
+                <div className="flex justify-between items-center p-3 bg-blue-50 rounded-lg">
+                  <div>
+                    <p className="font-medium">Semaglutide</p>
+                    <p className="text-sm text-gray-600">Primary treatment</p>
+                  </div>
+                  <p className="text-sm text-blue-600 font-medium">1-3 business days</p>
+                </div>
+                
+                {selectedRelatedProducts.map(product => (
+                  <div key={product.id} className="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
+                    <div>
+                      <p className="font-medium">{product.name}</p>
+                      <p className="text-sm text-gray-600">Additional treatment</p>
+                    </div>
+                    <p className="text-sm text-gray-600 font-medium">{product.deliveryTime}</p>
+                  </div>
+                ))}
               </div>
             </div>
             

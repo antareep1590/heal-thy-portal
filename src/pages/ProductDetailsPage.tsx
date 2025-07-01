@@ -7,7 +7,8 @@ import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Star, Clock, Shield, Truck, AlertCircle, CheckCircle } from "lucide-react";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Star, Clock, Shield, Truck, AlertCircle, CheckCircle, Plus } from "lucide-react";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 
@@ -16,10 +17,10 @@ const ProductDetailsPage = () => {
   const navigate = useNavigate();
   const [selectedDosage, setSelectedDosage] = useState("");
   const [subscriptionDuration, setSubscriptionDuration] = useState("1");
+  const [selectedRelatedProducts, setSelectedRelatedProducts] = useState<string[]>([]);
   
   // Simulate consultation status check
   const [hasValidConsultation, setHasValidConsultation] = useState(false);
-  const [consultationExpiry, setConsultationExpiry] = useState<Date | null>(null);
 
   // Mock product data
   const product = {
@@ -58,6 +59,26 @@ const ProductDetailsPage = () => {
     ]
   };
 
+  // Mock related products data
+  const relatedProducts = [
+    {
+      id: 2,
+      name: "B12 Injection",
+      description: "Energy boost and metabolic support",
+      price: 99,
+      image: "💉",
+      requiresConsultation: false
+    },
+    {
+      id: 3,
+      name: "Tirzepatide",
+      description: "Advanced dual-action weight loss treatment",
+      price: 399,
+      image: "💊",
+      requiresConsultation: true
+    }
+  ];
+
   useEffect(() => {
     // Check consultation status (mock implementation)
     const lastConsultation = localStorage.getItem('lastConsultation');
@@ -68,13 +89,24 @@ const ProductDetailsPage = () => {
       
       if (now < expiryDate) {
         setHasValidConsultation(true);
-        setConsultationExpiry(expiryDate);
       }
     }
   }, []);
 
   const selectedDosagePrice = product.dosages.find(d => d.value === selectedDosage)?.price || product.basePrice;
-  const totalPrice = selectedDosagePrice * parseInt(subscriptionDuration);
+  const relatedProductsTotal = selectedRelatedProducts.reduce((total, productId) => {
+    const relatedProduct = relatedProducts.find(p => p.id.toString() === productId);
+    return total + (relatedProduct?.price || 0);
+  }, 0);
+  const totalPrice = (selectedDosagePrice + relatedProductsTotal) * parseInt(subscriptionDuration);
+
+  const handleRelatedProductToggle = (productId: string) => {
+    setSelectedRelatedProducts(prev => 
+      prev.includes(productId) 
+        ? prev.filter(id => id !== productId)
+        : [...prev, productId]
+    );
+  };
 
   const handleProceedToCheckout = () => {
     if (!selectedDosage) {
@@ -82,9 +114,12 @@ const ProductDetailsPage = () => {
       return;
     }
 
-    // Always route to consultation flow first
-    // The consultation flow will determine if steps can be skipped
-    navigate(`/consultation/${id}?dosage=${selectedDosage}&duration=${subscriptionDuration}`);
+    // Build URL with selected products
+    const relatedProductsParam = selectedRelatedProducts.length > 0 
+      ? `&relatedProducts=${selectedRelatedProducts.join(',')}` 
+      : '';
+    
+    navigate(`/consultation/${id}?dosage=${selectedDosage}&duration=${subscriptionDuration}${relatedProductsParam}`);
   };
 
   return (
@@ -153,6 +188,44 @@ const ProductDetailsPage = () => {
                 </CardContent>
               </Card>
             </div>
+
+            {/* Related Products Section */}
+            <Card className="mb-8">
+              <CardContent className="p-6">
+                <h2 className="text-xl font-semibold mb-6">You Might Also Benefit From</h2>
+                <div className="space-y-4">
+                  {relatedProducts.map((relatedProduct) => (
+                    <div key={relatedProduct.id} className="flex items-center justify-between p-4 border rounded-lg hover:bg-gray-50">
+                      <div className="flex items-center space-x-4">
+                        <div className="text-2xl">{relatedProduct.image}</div>
+                        <div>
+                          <h3 className="font-semibold text-gray-900">{relatedProduct.name}</h3>
+                          <p className="text-sm text-gray-600">{relatedProduct.description}</p>
+                          <p className="text-sm font-semibold text-blue-600">${relatedProduct.price}/month</p>
+                          {relatedProduct.requiresConsultation && (
+                            <p className="text-xs text-orange-600">Additional consultation required</p>
+                          )}
+                        </div>
+                      </div>
+                      <div className="flex items-center space-x-2">
+                        <Checkbox
+                          checked={selectedRelatedProducts.includes(relatedProduct.id.toString())}
+                          onCheckedChange={() => handleRelatedProductToggle(relatedProduct.id.toString())}
+                        />
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => handleRelatedProductToggle(relatedProduct.id.toString())}
+                        >
+                          <Plus className="h-4 w-4" />
+                          Add
+                        </Button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
           </div>
 
           {/* Right Column - Purchase Options */}
@@ -164,7 +237,7 @@ const ProductDetailsPage = () => {
                   <Alert className="mb-6 border-green-200 bg-green-50">
                     <CheckCircle className="h-4 w-4 text-green-600" />
                     <AlertDescription className="text-green-800">
-                      Your consultation is valid until {consultationExpiry?.toLocaleDateString()}
+                      Your consultation is active and valid
                     </AlertDescription>
                   </Alert>
                 ) : (
@@ -221,6 +294,12 @@ const ProductDetailsPage = () => {
                     <span>Monthly price:</span>
                     <span>${selectedDosagePrice}</span>
                   </div>
+                  {selectedRelatedProducts.length > 0 && (
+                    <div className="flex justify-between text-sm text-gray-600">
+                      <span>Related products:</span>
+                      <span>${relatedProductsTotal}</span>
+                    </div>
+                  )}
                   <div className="flex justify-between text-sm text-gray-600">
                     <span>Duration:</span>
                     <span>{subscriptionDuration} month{subscriptionDuration !== "1" ? 's' : ''}</span>
