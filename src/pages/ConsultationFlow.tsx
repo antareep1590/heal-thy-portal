@@ -10,8 +10,9 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Progress } from "@/components/ui/progress";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { ArrowLeft, ArrowRight, CheckCircle } from "lucide-react";
+import { ArrowRight } from "lucide-react";
 import Header from "@/components/Header";
+import BreadcrumbNav from "@/components/BreadcrumbNav";
 
 const ConsultationFlow = () => {
   const { productId } = useParams();
@@ -42,9 +43,12 @@ const ConsultationFlow = () => {
     }
   };
 
-  const handlePrevious = () => {
+  const handleBack = () => {
     if (currentStep > 1) {
       setCurrentStep(currentStep - 1);
+    } else {
+      // Go back to product details page
+      navigate(`/product/${productId}`);
     }
   };
 
@@ -276,6 +280,14 @@ const ConsultationFlow = () => {
       <Header />
       
       <div className="container mx-auto px-4 py-8 max-w-4xl">
+        {/* Navigation */}
+        <BreadcrumbNav 
+          currentStep={currentStep}
+          totalSteps={totalSteps}
+          onBack={handleBack}
+          canGoBack={true}
+        />
+
         {/* Progress Bar */}
         <div className="mb-8">
           <div className="flex justify-between text-sm text-gray-500 mb-2">
@@ -297,16 +309,7 @@ const ConsultationFlow = () => {
         </Card>
 
         {/* Navigation */}
-        <div className="flex justify-between">
-          <Button 
-            variant="outline"
-            onClick={handlePrevious}
-            disabled={currentStep === 1}
-          >
-            <ArrowLeft className="h-4 w-4 mr-2" />
-            Previous
-          </Button>
-          
+        <div className="flex justify-end">
           <Button 
             onClick={handleNext}
             disabled={!isEligible}
