@@ -1,6 +1,6 @@
 
 import { useEffect } from "react";
-import { useSearchParams, Link } from "react-router-dom";
+import { useSearchParams, useNavigate, Link } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { CheckCircle, Package, Video, Clock, Truck, Mail } from "lucide-react";
@@ -9,6 +9,7 @@ import { useToast } from "@/hooks/use-toast";
 
 const ThankYou = () => {
   const [searchParams] = useSearchParams();
+  const navigate = useNavigate();
   const { toast } = useToast();
   const orderNumber = searchParams.get('order') || Math.random().toString(36).substr(2, 9).toUpperCase();
   const totalAmount = searchParams.get('total') || '89.99';
@@ -123,15 +124,15 @@ const ThankYou = () => {
             
             <div className="mt-6 pt-6 border-t">
               <Button 
-                onClick={handleStartConsultation}
+                onClick={() => navigate(`/intake-form?order=${orderNumber}`)}
                 className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3"
                 size="lg"
               >
                 <Video className="h-5 w-5 mr-2" />
-                Start Your Consultation
+                Start Consultation
               </Button>
               <p className="text-sm text-gray-500 text-center mt-2">
-                Connect with a licensed provider now
+                Complete your intake form first
               </p>
             </div>
           </CardContent>

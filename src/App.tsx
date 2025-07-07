@@ -13,6 +13,8 @@ import PostConsultationSummary from "./pages/PostConsultationSummary";
 import MySubscriptions from "./pages/MySubscriptions";
 import CheckoutPage from "./pages/CheckoutPage";
 import ThankYou from "./pages/ThankYou";
+import IntakeForm from "./pages/IntakeForm";
+import PreConsultation from "./pages/PreConsultation";
 import OrderHistory from "./pages/OrderHistory";
 import PaymentMethods from "./pages/PaymentMethods";
 import NotFound from "./pages/NotFound";
@@ -37,6 +39,8 @@ const App = () => (
           <Route path="/payment-methods" element={<PaymentMethods />} />
           <Route path="/checkout" element={<CheckoutPage />} />
           <Route path="/thank-you" element={<ThankYou />} />
+          <Route path="/intake-form" element={<IntakeForm />} />
+          <Route path="/pre-consultation" element={<PreConsultation />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>
