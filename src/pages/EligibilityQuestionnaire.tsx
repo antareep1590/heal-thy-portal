@@ -39,7 +39,6 @@ const EligibilityQuestionnaire = () => {
       validation: (value: string) => {
         const age = parseInt(value);
         if (age < 18 || age > 80) {
-          setIsEligible(false);
           return 'Age must be between 18 and 80 for this treatment';
         }
         return null;
@@ -83,7 +82,6 @@ const EligibilityQuestionnaire = () => {
       validation: (value: string[]) => {
         if (value?.includes('Heart disease or cardiovascular issues') || 
             value?.includes('Kidney disease')) {
-          setIsEligible(false);
           return 'Based on your medical history, this treatment may not be suitable';
         }
         return null;
@@ -139,7 +137,6 @@ const EligibilityQuestionnaire = () => {
       ],
       validation: (value: string[]) => {
         if (value?.includes('Gastroparesis')) {
-          setIneligibleProducts(prev => [...prev, productId]);
           return 'Gastroparesis is a contraindication for this medication';
         }
         return null;
@@ -158,6 +155,30 @@ const EligibilityQuestionnaire = () => {
     }
     if (currentStep === totalGeneralQuestions + 1) return null; // Transition step
     return productQuestions[currentStep - totalGeneralQuestions - 2];
+  };
+
+  // Calculate eligibility based on current responses
+  const calculateEligibility = () => {
+    // Check age eligibility
+    const age = parseInt(responses.age);
+    if (age && (age < 18 || age > 80)) {
+      return false;
+    }
+
+    // Check medical conditions
+    const medicalConditions = responses.medical_conditions || [];
+    if (medicalConditions.includes('Heart disease or cardiovascular issues') || 
+        medicalConditions.includes('Kidney disease')) {
+      return false;
+    }
+
+    // Check gastrointestinal issues
+    const giIssues = responses.gastrointestinal_issues || [];
+    if (giIssues.includes('Gastroparesis')) {
+      return false;
+    }
+
+    return true;
   };
 
   const progress = (currentStep / (totalSteps - 1)) * 100;
@@ -208,8 +229,10 @@ const EligibilityQuestionnaire = () => {
   };
 
   const handleComplete = () => {
-    // Check final eligibility
-    if (!isEligible) {
+    // Calculate final eligibility based on all responses
+    const finalEligibility = calculateEligibility();
+    
+    if (!finalEligibility) {
       // Show ineligible screen
       setCurrentStep(-1);
       return;
