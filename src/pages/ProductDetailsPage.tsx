@@ -113,12 +113,18 @@ const ProductDetailsPage = () => {
       return;
     }
 
-    // Build URL with selected products
-    const relatedProductsParam = selectedRelatedProducts.length > 0 
-      ? `&relatedProducts=${selectedRelatedProducts.join(',')}` 
-      : '';
+    // Build URL with selected products for eligibility questionnaire
+    const params = new URLSearchParams({
+      product: id || '',
+      dosage: selectedDosage,
+      duration: subscriptionDuration
+    });
     
-    navigate(`/consultation/${id}?dosage=${selectedDosage}&duration=${subscriptionDuration}${relatedProductsParam}`);
+    if (selectedRelatedProducts.length > 0) {
+      params.append('relatedProducts', selectedRelatedProducts.join(','));
+    }
+    
+    navigate(`/eligibility-questionnaire?${params.toString()}`);
   };
 
   return (
