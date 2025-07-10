@@ -17,6 +17,7 @@ import IntakeForm from "./pages/IntakeForm";
 import PreConsultation from "./pages/PreConsultation";
 import OrderHistory from "./pages/OrderHistory";
 import PaymentMethods from "./pages/PaymentMethods";
+import RenewalPage from "./pages/RenewalPage";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -41,6 +42,7 @@ const App = () => (
           <Route path="/thank-you" element={<ThankYou />} />
           <Route path="/intake-form" element={<IntakeForm />} />
           <Route path="/pre-consultation" element={<PreConsultation />} />
+          <Route path="/renewal" element={<RenewalPage />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>
