@@ -71,20 +71,12 @@ const Support = () => {
 
   const contactMethods = [
     {
-      icon: MessageCircle,
-      title: "Live Chat",
-      description: "Get instant help from our support team",
-      availability: "24/7",
-      action: "Start Chat",
-      primary: true
-    },
-    {
       icon: Phone,
       title: "Phone Support",
       description: "Speak with a support specialist",
       availability: "Mon-Fri, 8AM-8PM EST",
       action: "1-800-HEALTH",
-      primary: false
+      primary: true
     },
     {
       icon: Mail,
@@ -131,7 +123,7 @@ const Support = () => {
         </div>
 
         {/* Quick Contact Methods */}
-        <div className="grid md:grid-cols-3 gap-6 mb-12">
+        <div className="grid md:grid-cols-2 gap-6 mb-12">
           {contactMethods.map((method, index) => {
             const Icon = method.icon;
             return (
