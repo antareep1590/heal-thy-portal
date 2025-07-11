@@ -57,38 +57,14 @@ const Header = () => {
           {/* Desktop Actions */}
           <div className="hidden md:flex items-center space-x-4">
             {isLoggedIn ? (
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button variant="outline" size="sm">
-                    <User className="h-4 w-4 mr-2" />
-                    My Account
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="w-56">
-                  <div className="px-2 py-1.5 text-sm font-medium text-gray-900">
-                    Welcome, {userName}
-                  </div>
-                  <DropdownMenuSeparator />
-                  <DropdownMenuItem onClick={() => navigate('/my-subscriptions')}>
-                    <Package className="h-4 w-4 mr-2" />
-                    My Subscriptions
-                    <Badge variant="secondary" className="ml-auto">2</Badge>
-                  </DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => navigate('/order-history')}>
-                    <History className="h-4 w-4 mr-2" />
-                    Order History
-                  </DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => navigate('/payment-methods')}>
-                    <CreditCard className="h-4 w-4 mr-2" />
-                    Manage Payment Methods
-                  </DropdownMenuItem>
-                  <DropdownMenuSeparator />
-                  <DropdownMenuItem className="text-red-600">
-                    <LogOut className="h-4 w-4 mr-2" />
-                    Logout
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
+              <Button 
+                variant="outline" 
+                size="sm"
+                onClick={() => navigate('/my-account')}
+              >
+                <User className="h-4 w-4 mr-2" />
+                My Account
+              </Button>
             ) : (
               <Button variant="outline" size="sm">
                 <User className="h-4 w-4 mr-2" />
@@ -137,31 +113,10 @@ const Header = () => {
                     <Button 
                       variant="outline" 
                       className="w-full justify-start"
-                      onClick={() => {navigate('/my-subscriptions'); setIsMenuOpen(false);}}
+                      onClick={() => {navigate('/my-account'); setIsMenuOpen(false);}}
                     >
-                      <Package className="h-4 w-4 mr-2" />
-                      My Subscriptions
-                      <Badge variant="secondary" className="ml-auto">2</Badge>
-                    </Button>
-                    <Button 
-                      variant="outline" 
-                      className="w-full justify-start"
-                      onClick={() => {navigate('/order-history'); setIsMenuOpen(false);}}
-                    >
-                      <History className="h-4 w-4 mr-2" />
-                      Order History
-                    </Button>
-                    <Button 
-                      variant="outline" 
-                      className="w-full justify-start"
-                      onClick={() => {navigate('/payment-methods'); setIsMenuOpen(false);}}
-                    >
-                      <CreditCard className="h-4 w-4 mr-2" />
-                      Payment Methods
-                    </Button>
-                    <Button variant="outline" className="w-full justify-start text-red-600">
-                      <LogOut className="h-4 w-4 mr-2" />
-                      Logout
+                      <User className="h-4 w-4 mr-2" />
+                      My Account
                     </Button>
                   </>
                 ) : (

@@ -16,6 +16,7 @@ import ThankYou from "./pages/ThankYou";
 import IntakeForm from "./pages/IntakeForm";
 import PreConsultation from "./pages/PreConsultation";
 import OrderHistory from "./pages/OrderHistory";
+import MyAccount from "./pages/MyAccount";
 import PaymentMethods from "./pages/PaymentMethods";
 import RenewalPage from "./pages/RenewalPage";
 import EligibilityQuestionnaire from "./pages/EligibilityQuestionnaire";
@@ -36,6 +37,7 @@ const App = () => (
           <Route path="/product/:id" element={<ProductDetailsPage />} />
           <Route path="/consultation/:productId" element={<ConsultationFlow />} />
           <Route path="/consultation-summary/:consultId" element={<PostConsultationSummary />} />
+          <Route path="/my-account" element={<MyAccount />} />
           <Route path="/my-subscriptions" element={<MySubscriptions />} />
           <Route path="/order-history" element={<OrderHistory />} />
           <Route path="/payment-methods" element={<PaymentMethods />} />
