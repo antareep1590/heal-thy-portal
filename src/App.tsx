@@ -20,6 +20,8 @@ import MyAccount from "./pages/MyAccount";
 import PaymentMethods from "./pages/PaymentMethods";
 import RenewalPage from "./pages/RenewalPage";
 import EligibilityQuestionnaire from "./pages/EligibilityQuestionnaire";
+import HowItWorks from "./pages/HowItWorks";
+import Support from "./pages/Support";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -47,6 +49,8 @@ const App = () => (
           <Route path="/pre-consultation" element={<PreConsultation />} />
           <Route path="/renewal" element={<RenewalPage />} />
           <Route path="/eligibility-questionnaire" element={<EligibilityQuestionnaire />} />
+          <Route path="/how-it-works" element={<HowItWorks />} />
+          <Route path="/support" element={<Support />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>

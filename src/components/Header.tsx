@@ -46,10 +46,16 @@ const Header = () => {
             >
               All Products
             </button>
-            <button className="text-gray-600 hover:text-gray-900 transition-colors">
+            <button 
+              onClick={() => navigate('/how-it-works')}
+              className="text-gray-600 hover:text-gray-900 transition-colors"
+            >
               How It Works
             </button>
-            <button className="text-gray-600 hover:text-gray-900 transition-colors">
+            <button 
+              onClick={() => navigate('/support')}
+              className="text-gray-600 hover:text-gray-900 transition-colors"
+            >
               Support
             </button>
           </nav>
@@ -98,10 +104,16 @@ const Header = () => {
               >
                 All Products
               </button>
-              <button className="block w-full text-left text-gray-600 hover:text-gray-900 py-2">
+              <button 
+                onClick={() => {navigate('/how-it-works'); setIsMenuOpen(false);}}
+                className="block w-full text-left text-gray-600 hover:text-gray-900 py-2"
+              >
                 How It Works
               </button>
-              <button className="block w-full text-left text-gray-600 hover:text-gray-900 py-2">
+              <button 
+                onClick={() => {navigate('/support'); setIsMenuOpen(false);}}
+                className="block w-full text-left text-gray-600 hover:text-gray-900 py-2"
+              >
                 Support
               </button>
               <div className="pt-4 space-y-2">
