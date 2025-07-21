@@ -3,11 +3,18 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Package, Receipt, Truck, RotateCcw, Eye } from "lucide-react";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Textarea } from "@/components/ui/textarea";
+import { Package, Receipt, Truck, RotateCcw, Eye, Star, MessageSquare } from "lucide-react";
+import { useState } from "react";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 
 const OrderHistory = () => {
+  const [reviews, setReviews] = useState<{[key: string]: {rating: number, review: string}}>({});
+  const [tempRating, setTempRating] = useState(0);
+  const [tempReview, setTempReview] = useState("");
+
   // Mock order data
   const orders = [
     {
@@ -56,6 +63,37 @@ const OrderHistory = () => {
       default:
         return <Badge variant="secondary">{status}</Badge>;
     }
+  };
+
+  const handleSubmitReview = (orderId: string) => {
+    setReviews(prev => ({
+      ...prev,
+      [orderId]: { rating: tempRating, review: tempReview }
+    }));
+    setTempRating(0);
+    setTempReview("");
+  };
+
+  const StarRating = ({ rating, onRatingChange, readonly = false }: { 
+    rating: number; 
+    onRatingChange?: (rating: number) => void; 
+    readonly?: boolean;
+  }) => {
+    return (
+      <div className="flex gap-1">
+        {[1, 2, 3, 4, 5].map((star) => (
+          <Star
+            key={star}
+            className={`h-5 w-5 cursor-pointer transition-colors ${
+              star <= rating 
+                ? "fill-yellow-400 text-yellow-400" 
+                : "text-gray-300 hover:text-yellow-400"
+            } ${readonly ? "cursor-default" : ""}`}
+            onClick={() => !readonly && onRatingChange?.(star)}
+          />
+        ))}
+      </div>
+    );
   };
 
   return (
@@ -110,7 +148,7 @@ const OrderHistory = () => {
                       <TableCell>${order.total.toFixed(2)}</TableCell>
                       <TableCell>{getStatusBadge(order.status)}</TableCell>
                       <TableCell>
-                        <div className="flex gap-2">
+                        <div className="flex gap-2 flex-wrap">
                           <Button variant="outline" size="sm">
                             <Eye className="h-4 w-4 mr-1" />
                             View
@@ -130,6 +168,63 @@ const OrderHistory = () => {
                               <RotateCcw className="h-4 w-4 mr-1" />
                               Reorder
                             </Button>
+                          )}
+                          {order.status === "delivered" && (
+                            <Dialog>
+                              <DialogTrigger asChild>
+                                <Button variant="outline" size="sm">
+                                  <MessageSquare className="h-4 w-4 mr-1" />
+                                  {reviews[order.id] ? "Edit Review" : "Review"}
+                                </Button>
+                              </DialogTrigger>
+                              <DialogContent className="max-w-md">
+                                <DialogHeader>
+                                  <DialogTitle>Rate & Review Product</DialogTitle>
+                                </DialogHeader>
+                                <div className="space-y-4">
+                                  <div>
+                                    <h4 className="font-medium mb-2">{order.productName}</h4>
+                                    <p className="text-sm text-gray-600 mb-4">Share your experience with this product</p>
+                                  </div>
+                                  
+                                  <div>
+                                    <label className="block text-sm font-medium mb-2">Rating</label>
+                                    <StarRating 
+                                      rating={tempRating || reviews[order.id]?.rating || 0} 
+                                      onRatingChange={setTempRating} 
+                                    />
+                                  </div>
+                                  
+                                  <div>
+                                    <label className="block text-sm font-medium mb-2">Review</label>
+                                    <Textarea
+                                      placeholder="Share your thoughts about this product..."
+                                      value={tempReview || reviews[order.id]?.review || ""}
+                                      onChange={(e) => setTempReview(e.target.value)}
+                                      className="min-h-[100px]"
+                                    />
+                                  </div>
+                                  
+                                  <div className="flex gap-2">
+                                    <Button 
+                                      onClick={() => handleSubmitReview(order.id)}
+                                      disabled={tempRating === 0 && !reviews[order.id]?.rating}
+                                      className="flex-1"
+                                    >
+                                      Submit Review
+                                    </Button>
+                                  </div>
+                                  
+                                  {reviews[order.id] && (
+                                    <div className="border-t pt-4">
+                                      <h5 className="font-medium mb-2">Current Review</h5>
+                                      <StarRating rating={reviews[order.id].rating} readonly />
+                                      <p className="text-sm text-gray-600 mt-2">{reviews[order.id].review}</p>
+                                    </div>
+                                  )}
+                                </div>
+                              </DialogContent>
+                            </Dialog>
                           )}
                         </div>
                       </TableCell>
@@ -188,6 +283,63 @@ const OrderHistory = () => {
                       <RotateCcw className="h-4 w-4 mr-1" />
                       Reorder
                     </Button>
+                  )}
+                  {order.status === "delivered" && (
+                    <Dialog>
+                      <DialogTrigger asChild>
+                        <Button variant="outline" size="sm">
+                          <MessageSquare className="h-4 w-4 mr-1" />
+                          {reviews[order.id] ? "Edit Review" : "Review"}
+                        </Button>
+                      </DialogTrigger>
+                      <DialogContent className="max-w-md">
+                        <DialogHeader>
+                          <DialogTitle>Rate & Review Product</DialogTitle>
+                        </DialogHeader>
+                        <div className="space-y-4">
+                          <div>
+                            <h4 className="font-medium mb-2">{order.productName}</h4>
+                            <p className="text-sm text-gray-600 mb-4">Share your experience with this product</p>
+                          </div>
+                          
+                          <div>
+                            <label className="block text-sm font-medium mb-2">Rating</label>
+                            <StarRating 
+                              rating={tempRating || reviews[order.id]?.rating || 0} 
+                              onRatingChange={setTempRating} 
+                            />
+                          </div>
+                          
+                          <div>
+                            <label className="block text-sm font-medium mb-2">Review</label>
+                            <Textarea
+                              placeholder="Share your thoughts about this product..."
+                              value={tempReview || reviews[order.id]?.review || ""}
+                              onChange={(e) => setTempReview(e.target.value)}
+                              className="min-h-[100px]"
+                            />
+                          </div>
+                          
+                          <div className="flex gap-2">
+                            <Button 
+                              onClick={() => handleSubmitReview(order.id)}
+                              disabled={tempRating === 0 && !reviews[order.id]?.rating}
+                              className="flex-1"
+                            >
+                              Submit Review
+                            </Button>
+                          </div>
+                          
+                          {reviews[order.id] && (
+                            <div className="border-t pt-4">
+                              <h5 className="font-medium mb-2">Current Review</h5>
+                              <StarRating rating={reviews[order.id].rating} readonly />
+                              <p className="text-sm text-gray-600 mt-2">{reviews[order.id].review}</p>
+                            </div>
+                          )}
+                        </div>
+                      </DialogContent>
+                    </Dialog>
                   )}
                 </div>
               </CardContent>
