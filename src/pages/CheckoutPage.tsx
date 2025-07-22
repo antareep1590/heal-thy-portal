@@ -381,111 +381,160 @@ const CheckoutPage = () => {
                 <CardTitle>Order Summary</CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
-                {/* Order Table */}
-                <div className="border rounded-lg overflow-hidden">
-                  <Table>
-                    <TableHeader>
-                      <TableRow>
-                        <TableHead>Product</TableHead>
-                        <TableHead>Dosage</TableHead>
-                        <TableHead>Plan</TableHead>
-                        <TableHead>Price</TableHead>
-                        <TableHead>Actions</TableHead>
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {/* Main Product */}
-                      <TableRow className="bg-blue-50/50">
-                        <TableCell className="font-medium">{product.name}</TableCell>
-                        <TableCell>
-                          {editingProduct === 'main' ? (
-                            <Select value={tempDosage} onValueChange={setTempDosage}>
-                              <SelectTrigger className="w-32">
-                                <SelectValue />
-                              </SelectTrigger>
-                              <SelectContent>
-                                {product.dosages.map(d => (
-                                  <SelectItem key={d.value} value={d.value}>{d.value}</SelectItem>
-                                ))}
-                              </SelectContent>
-                            </Select>
-                          ) : (
-                            dosage
-                          )}
-                        </TableCell>
-                        <TableCell>
-                          {editingProduct === 'main' ? (
-                            <Select value={tempDuration} onValueChange={setTempDuration}>
-                              <SelectTrigger className="w-32">
+                {/* Products Cards */}
+                <div className="space-y-4">
+                  {/* Main Product Card */}
+                  <Card className="border-2 border-primary/20">
+                    <CardContent className="p-4">
+                      <div className="flex justify-between items-start mb-4">
+                        <div>
+                          <h3 className="font-semibold text-lg">{product.name}</h3>
+                          <p className="text-sm text-muted-foreground">Primary Product</p>
+                        </div>
+                        <div className="text-right">
+                          <div className="text-lg font-bold">${selectedDosagePrice * parseInt(selectedDuration)}</div>
+                          <div className="text-sm text-muted-foreground">
+                            ${selectedDosagePrice} × {selectedDuration} month(s)
+                          </div>
+                        </div>
+                      </div>
+                      
+                      <div className="grid grid-cols-2 gap-4">
+                        <div>
+                          <Label className="text-sm font-medium">Dosage</Label>
+                          <Select 
+                            value={editingProduct === 'main' ? tempDosage : dosage || '0.25mg'} 
+                            onValueChange={(value) => {
+                              if (editingProduct !== 'main') {
+                                setEditingProduct('main');
+                                setTempDosage(value);
+                                setTempDuration(duration);
+                              } else {
+                                setTempDosage(value);
+                              }
+                            }}
+                          >
+                            <SelectTrigger>
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {product.dosages.map(d => (
+                                <SelectItem key={d.value} value={d.value}>
+                                  {d.label}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                        </div>
+                        
+                        <div>
+                          <Label className="text-sm font-medium">Subscription Plan</Label>
+                          <Select 
+                            value={editingProduct === 'main' ? tempDuration : selectedDuration} 
+                            onValueChange={(value) => {
+                              if (editingProduct !== 'main') {
+                                setEditingProduct('main');
+                                setTempDosage(dosage || '0.25mg');
+                                setTempDuration(value);
+                              } else {
+                                setTempDuration(value);
+                              }
+                            }}
+                          >
+                            <SelectTrigger>
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {subscriptionPlans.map(plan => (
+                                <SelectItem key={plan.value} value={plan.value}>
+                                  {plan.label}
+                                  {plan.discount > 0 && (
+                                    <span className="ml-2 text-green-600">({plan.discount}% off)</span>
+                                  )}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                        </div>
+                      </div>
+                      
+                      {editingProduct === 'main' && (
+                        <div className="flex space-x-2 mt-4">
+                          <Button size="sm" onClick={handleSaveProductChanges}>
+                            Update Product
+                          </Button>
+                          <Button 
+                            size="sm" 
+                            variant="outline" 
+                            onClick={() => {
+                              setEditingProduct(null);
+                              setTempDosage(dosage || '0.25mg');
+                              setTempDuration(duration);
+                            }}
+                          >
+                            Cancel
+                          </Button>
+                        </div>
+                      )}
+                    </CardContent>
+                  </Card>
+
+                  {/* Related Products Cards */}
+                  {selectedRelatedProducts.map(productId => {
+                    const relatedProduct = relatedProductsData.find(p => p.id === productId);
+                    if (!relatedProduct) return null;
+                    
+                    return (
+                      <Card key={productId} className="border">
+                        <CardContent className="p-4">
+                          <div className="flex justify-between items-start mb-4">
+                            <div>
+                              <h3 className="font-semibold">{relatedProduct.name}</h3>
+                              <p className="text-sm text-muted-foreground">Related Product</p>
+                            </div>
+                            <div className="flex items-center space-x-2">
+                              <div className="text-right">
+                                <div className="font-bold">${relatedProduct.price * parseInt(selectedDuration)}</div>
+                                <div className="text-sm text-muted-foreground">
+                                  ${relatedProduct.price} × {selectedDuration} month(s)
+                                </div>
+                              </div>
+                              <Button
+                                size="sm"
+                                variant="ghost"
+                                onClick={() => handleRemoveRelatedProduct(productId)}
+                                className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                              >
+                                <X className="h-4 w-4" />
+                              </Button>
+                            </div>
+                          </div>
+                          
+                          <div>
+                            <Label className="text-sm font-medium">Subscription Plan</Label>
+                            <Select value={selectedDuration} disabled>
+                              <SelectTrigger>
                                 <SelectValue />
                               </SelectTrigger>
                               <SelectContent>
                                 {subscriptionPlans.map(plan => (
                                   <SelectItem key={plan.value} value={plan.value}>
                                     {plan.label}
+                                    {plan.discount > 0 && (
+                                      <span className="ml-2 text-green-600">({plan.discount}% off)</span>
+                                    )}
                                   </SelectItem>
                                 ))}
                               </SelectContent>
                             </Select>
-                          ) : (
-                            subscriptionPlans.find(p => p.value === selectedDuration)?.label
-                          )}
-                        </TableCell>
-                        <TableCell className="font-semibold">
-                          ${selectedDosagePrice * parseInt(selectedDuration)}
-                        </TableCell>
-                        <TableCell>
-                          {editingProduct === 'main' ? (
-                            <div className="flex space-x-1">
-                              <Button size="sm" onClick={handleSaveProductChanges}>
-                                Save
-                              </Button>
-                              <Button size="sm" variant="outline" onClick={() => setEditingProduct(null)}>
-                                Cancel
-                              </Button>
-                            </div>
-                          ) : (
-                            <Button 
-                              size="sm" 
-                              variant="ghost"
-                              onClick={() => setEditingProduct('main')}
-                            >
-                              <Edit2 className="h-4 w-4" />
-                            </Button>
-                          )}
-                        </TableCell>
-                      </TableRow>
-
-                      {/* Related Products */}
-                      {selectedRelatedProducts.map(productId => {
-                        const relatedProduct = relatedProductsData.find(p => p.id === productId);
-                        if (!relatedProduct) return null;
-                        
-                        return (
-                          <TableRow key={productId}>
-                            <TableCell className="font-medium">{relatedProduct.name}</TableCell>
-                            <TableCell>-</TableCell>
-                            <TableCell>
-                              {subscriptionPlans.find(p => p.value === selectedDuration)?.label}
-                            </TableCell>
-                            <TableCell className="font-semibold">
-                              ${relatedProduct.price * parseInt(selectedDuration)}
-                            </TableCell>
-                            <TableCell>
-                              <Button
-                                size="sm"
-                                variant="ghost"
-                                onClick={() => handleRemoveRelatedProduct(productId)}
-                                className="text-red-600 hover:text-red-800"
-                              >
-                                <X className="h-4 w-4" />
-                              </Button>
-                            </TableCell>
-                          </TableRow>
-                        );
-                      })}
-                    </TableBody>
-                  </Table>
+                            <p className="text-xs text-muted-foreground mt-1">
+                              Follows the main product's subscription plan
+                            </p>
+                          </div>
+                        </CardContent>
+                      </Card>
+                    );
+                  })}
                 </div>
 
                 {/* Coupon Code */}
