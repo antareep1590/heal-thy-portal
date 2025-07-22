@@ -8,7 +8,8 @@ import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Separator } from "@/components/ui/separator";
-import { Shield, CreditCard, X } from "lucide-react";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Shield, CreditCard, X, Edit2, Tag } from "lucide-react";
 import Header from "@/components/Header";
 
 const CheckoutPage = () => {
@@ -41,6 +42,18 @@ const CheckoutPage = () => {
 
   const [selectedRelatedProducts, setSelectedRelatedProducts] = useState<string[]>(relatedProductIds);
   const [isLoggedIn] = useState(false); // Mock login state
+  const [couponCode, setCouponCode] = useState('');
+  const [couponDiscount, setCouponDiscount] = useState(0);
+  const [editingProduct, setEditingProduct] = useState<string | null>(null);
+  const [tempDosage, setTempDosage] = useState(dosage || '0.25mg');
+  const [tempDuration, setTempDuration] = useState(duration);
+
+  const subscriptionPlans = [
+    { value: "1", label: "1 month", discount: 0 },
+    { value: "3", label: "3 months", discount: 10 },
+    { value: "6", label: "6 months", discount: 15 },
+    { value: "12", label: "12 months", discount: 20 }
+  ];
 
   // Mock product data
   const product = {
@@ -58,12 +71,18 @@ const CheckoutPage = () => {
     { id: "3", name: "Tirzepatide", price: 399 }
   ];
 
-  const selectedDosagePrice = product.dosages.find(d => d.value === dosage)?.price || 299;
+  const getDiscountedPrice = (price: number) => {
+    return price * (1 - couponDiscount / 100);
+  };
+
+  const selectedDosagePrice = product.dosages.find(d => d.value === (editingProduct === 'main' ? tempDosage : dosage))?.price || 299;
+  const selectedDuration = editingProduct === 'main' ? tempDuration : duration;
   const relatedProductsTotal = selectedRelatedProducts.reduce((total, productId) => {
     const relatedProduct = relatedProductsData.find(p => p.id === productId);
     return total + (relatedProduct?.price || 0);
   }, 0);
-  const totalPrice = (selectedDosagePrice + relatedProductsTotal) * parseInt(duration);
+  const subtotal = (selectedDosagePrice + relatedProductsTotal) * parseInt(selectedDuration);
+  const totalPrice = getDiscountedPrice(subtotal);
   const consultationFee = 49;
 
   const handleInputChange = (field: string, value: string | boolean) => {
@@ -73,6 +92,32 @@ const CheckoutPage = () => {
   const handleRemoveRelatedProduct = (productId: string) => {
     setSelectedRelatedProducts(prev => prev.filter(id => id !== productId));
   };
+
+  const handleApplyCoupon = () => {
+    // Mock coupon validation
+    const validCoupons = {
+      'SAVE10': 10,
+      'WELCOME15': 15,
+      'FIRST20': 20
+    };
+    
+    const discount = validCoupons[couponCode as keyof typeof validCoupons] || 0;
+    setCouponDiscount(discount);
+    
+    if (discount === 0 && couponCode) {
+      alert('Invalid coupon code');
+    }
+  };
+
+  const handleSaveProductChanges = () => {
+    // Update URL params with new selections
+    const newParams = new URLSearchParams(searchParams);
+    newParams.set('dosage', tempDosage);
+    newParams.set('duration', tempDuration);
+    window.history.replaceState({}, '', `${window.location.pathname}?${newParams}`);
+    setEditingProduct(null);
+  };
+
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -336,58 +381,154 @@ const CheckoutPage = () => {
                 <CardTitle>Order Summary</CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
-                {/* Main Product */}
-                <div className="p-4 bg-blue-50 rounded-lg">
-                  <div className="flex justify-between items-start mb-2">
-                    <div>
-                      <h3 className="font-semibold text-gray-900">{product.name}</h3>
-                      <p className="text-sm text-gray-600">Dosage: {dosage}</p>
-                      <p className="text-sm text-gray-600">Duration: {duration} month{duration !== "1" ? 's' : ''}</p>
-                    </div>
-                    <p className="font-semibold">${selectedDosagePrice * parseInt(duration)}</p>
-                  </div>
-                </div>
-
-                {/* Related Products */}
-                {selectedRelatedProducts.length > 0 && (
-                  <div className="space-y-2">
-                    <h4 className="font-semibold text-sm text-gray-700">Additional Products:</h4>
-                    {selectedRelatedProducts.map(productId => {
-                      const relatedProduct = relatedProductsData.find(p => p.id === productId);
-                      if (!relatedProduct) return null;
-                      
-                      return (
-                        <div key={productId} className="p-3 bg-gray-50 rounded-lg">
-                          <div className="flex justify-between items-center">
-                            <div>
-                              <h5 className="font-medium text-gray-900">{relatedProduct.name}</h5>
-                              <p className="text-sm text-gray-600">{duration} month{duration !== "1" ? 's' : ''}</p>
+                {/* Order Table */}
+                <div className="border rounded-lg overflow-hidden">
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>Product</TableHead>
+                        <TableHead>Dosage</TableHead>
+                        <TableHead>Plan</TableHead>
+                        <TableHead>Price</TableHead>
+                        <TableHead>Actions</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {/* Main Product */}
+                      <TableRow className="bg-blue-50/50">
+                        <TableCell className="font-medium">{product.name}</TableCell>
+                        <TableCell>
+                          {editingProduct === 'main' ? (
+                            <Select value={tempDosage} onValueChange={setTempDosage}>
+                              <SelectTrigger className="w-32">
+                                <SelectValue />
+                              </SelectTrigger>
+                              <SelectContent>
+                                {product.dosages.map(d => (
+                                  <SelectItem key={d.value} value={d.value}>{d.value}</SelectItem>
+                                ))}
+                              </SelectContent>
+                            </Select>
+                          ) : (
+                            dosage
+                          )}
+                        </TableCell>
+                        <TableCell>
+                          {editingProduct === 'main' ? (
+                            <Select value={tempDuration} onValueChange={setTempDuration}>
+                              <SelectTrigger className="w-32">
+                                <SelectValue />
+                              </SelectTrigger>
+                              <SelectContent>
+                                {subscriptionPlans.map(plan => (
+                                  <SelectItem key={plan.value} value={plan.value}>
+                                    {plan.label}
+                                  </SelectItem>
+                                ))}
+                              </SelectContent>
+                            </Select>
+                          ) : (
+                            subscriptionPlans.find(p => p.value === selectedDuration)?.label
+                          )}
+                        </TableCell>
+                        <TableCell className="font-semibold">
+                          ${selectedDosagePrice * parseInt(selectedDuration)}
+                        </TableCell>
+                        <TableCell>
+                          {editingProduct === 'main' ? (
+                            <div className="flex space-x-1">
+                              <Button size="sm" onClick={handleSaveProductChanges}>
+                                Save
+                              </Button>
+                              <Button size="sm" variant="outline" onClick={() => setEditingProduct(null)}>
+                                Cancel
+                              </Button>
                             </div>
-                            <div className="flex items-center space-x-2">
-                              <span className="font-semibold">${relatedProduct.price * parseInt(duration)}</span>
+                          ) : (
+                            <Button 
+                              size="sm" 
+                              variant="ghost"
+                              onClick={() => setEditingProduct('main')}
+                            >
+                              <Edit2 className="h-4 w-4" />
+                            </Button>
+                          )}
+                        </TableCell>
+                      </TableRow>
+
+                      {/* Related Products */}
+                      {selectedRelatedProducts.map(productId => {
+                        const relatedProduct = relatedProductsData.find(p => p.id === productId);
+                        if (!relatedProduct) return null;
+                        
+                        return (
+                          <TableRow key={productId}>
+                            <TableCell className="font-medium">{relatedProduct.name}</TableCell>
+                            <TableCell>-</TableCell>
+                            <TableCell>
+                              {subscriptionPlans.find(p => p.value === selectedDuration)?.label}
+                            </TableCell>
+                            <TableCell className="font-semibold">
+                              ${relatedProduct.price * parseInt(selectedDuration)}
+                            </TableCell>
+                            <TableCell>
                               <Button
-                                variant="ghost"
                                 size="sm"
+                                variant="ghost"
                                 onClick={() => handleRemoveRelatedProduct(productId)}
                                 className="text-red-600 hover:text-red-800"
                               >
                                 <X className="h-4 w-4" />
                               </Button>
-                            </div>
-                          </div>
-                        </div>
-                      );
-                    })}
+                            </TableCell>
+                          </TableRow>
+                        );
+                      })}
+                    </TableBody>
+                  </Table>
+                </div>
+
+                {/* Coupon Code */}
+                <div className="p-4 border rounded-lg bg-gray-50">
+                  <div className="flex items-center space-x-2 mb-2">
+                    <Tag className="h-4 w-4" />
+                    <Label htmlFor="coupon">Coupon Code</Label>
                   </div>
-                )}
+                  <div className="flex space-x-2">
+                    <Input
+                      id="coupon"
+                      placeholder="Enter coupon code"
+                      value={couponCode}
+                      onChange={(e) => setCouponCode(e.target.value.toUpperCase())}
+                    />
+                    <Button onClick={handleApplyCoupon} variant="outline">
+                      Apply
+                    </Button>
+                  </div>
+                  {couponDiscount > 0 && (
+                    <p className="text-sm text-green-600 mt-2">
+                      Coupon applied! {couponDiscount}% discount
+                    </p>
+                  )}
+                </div>
 
                 <Separator />
 
                 {/* Pricing Summary */}
                 <div className="space-y-3">
                   <div className="flex justify-between">
+                    <span>Subtotal:</span>
+                    <span>${subtotal}</span>
+                  </div>
+                  {couponDiscount > 0 && (
+                    <div className="flex justify-between text-green-600">
+                      <span>Discount ({couponDiscount}%):</span>
+                      <span>-${(subtotal * couponDiscount / 100).toFixed(2)}</span>
+                    </div>
+                  )}
+                  <div className="flex justify-between">
                     <span>Treatment cost:</span>
-                    <span>${totalPrice}</span>
+                    <span>${totalPrice.toFixed(2)}</span>
                   </div>
                   <div className="flex justify-between">
                     <span>Consultation fee:</span>
@@ -396,7 +537,7 @@ const CheckoutPage = () => {
                   <Separator />
                   <div className="flex justify-between text-lg font-semibold">
                     <span>Total:</span>
-                    <span>${totalPrice + consultationFee}</span>
+                    <span>${(totalPrice + consultationFee).toFixed(2)}</span>
                   </div>
                 </div>
 
